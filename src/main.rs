@@ -1,4 +1,9 @@
-use actix_web::{App, HttpServer, web};
+mod config;
+mod db;
+mod auth;
+mod bets;
+mod users;
+mod models;
 use config::Config;
 use db::connect;
 use auth::handler::register;
