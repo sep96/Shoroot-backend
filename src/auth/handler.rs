@@ -15,7 +15,7 @@ pub async fn register(
     pool: web::Data<PgPool>,
     data: web::Json<RegisterData>,
 ) -> impl Responder {
-    let user_id = uuid::Uuid::new_v4().to_string();
+    let user_id = uuid::Uuid::new_v4();
     let hashed_password = data.password.clone(); // هش واقعی اضافه شود
     sqlx::query!(
         "INSERT INTO users (id, username, email, password_hash) VALUES ($1, $2, $3, $4)",
