@@ -4,7 +4,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 use crate::models::user::{RegisterInput, LoginInput, User};
 use crate::auth::jwt::create_jwt;
-use argon2::{self, Config};
+use argon2::{Argon2, password_hash::{PasswordHasher, PasswordVerifier, SaltString, PasswordHash, rand_core::OsRng}};
+
+
 
 #[post("/api/register")]
 pub async fn register_user(
@@ -35,17 +37,17 @@ pub async fn login_user(
     db: web::Data<PgPool>,
     input: web::Json<LoginInput>,
 ) -> impl Responder {
-    let result = sqlx::query_as!(
-        User,
-        "SELECT id, username, email, password_hash, balance FROM users WHERE username = $1",
-        input.username
+    let result = sqlx::query_as::<_, User>(
+        "SELECT id, username, email, password_hash, balance FROM users WHERE username = $1"
     )
+    .bind(&input.username)
     .fetch_one(db.get_ref())
     .await;
 
     match result {
         Ok(user) if verify_password(&input.password, &user.password_hash) => {
-            let token = create_jwt(user.id.to_string());
+            let jwt_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET not set");
+            let token = create_jwt(&user.id.to_string(), &jwt_secret);
             HttpResponse::Ok().json(json!({ "token": token }))
         },
         _ => HttpResponse::Unauthorized().json(json!({"error": "Invalid credentials"})),
@@ -53,10 +55,14 @@ pub async fn login_user(
 }
 
 fn hash_password(password: &str) -> String {
-    let salt = b"somesalt";
-    argon2::hash_encoded(password.as_bytes(), salt, &Config::default()).unwrap()
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let password_hash = argon2.hash_password(password.as_bytes(), &salt)
+        .unwrap()
+        .to_string();
+    password_hash
 }
-
 fn verify_password(password: &str, hash: &str) -> bool {
-    argon2::verify_encoded(hash, password.as_bytes()).unwrap_or(false)
+    let parsed_hash = PasswordHash::new(hash).unwrap();
+    Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok()
 }
