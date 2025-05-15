@@ -7,7 +7,7 @@ mod models;
 use config::Config;
 use db::connect;
 use auth::handler::register;
-
+use actix_web::{App, HttpServer, web};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
