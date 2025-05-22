@@ -15,5 +15,5 @@ dotenv = "0.15"
 env_logger = "0.10"
 log = "0.4"
 argon2 = "0.5"
-utoipa = { version = "3", features = ["macros", "actix_extras", "uuid", "chrono"] }
+utoipa = { version = "3", features = ["actix_extras", "uuid"] }
 utoipa-swagger-ui = "3"
