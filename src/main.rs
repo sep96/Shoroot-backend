@@ -8,6 +8,7 @@
     use db::connect;
     use users::handler::{register_user, login_user};
     use actix_web::{App, HttpServer, web};
+    use bets::handler::place_bet;
     #[actix_web::main]
     async fn main() -> std::io::Result<()> {
         dotenv::dotenv().ok();
