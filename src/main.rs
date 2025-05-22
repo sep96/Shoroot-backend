@@ -8,7 +8,27 @@
     use db::connect;
     use users::handler::{register_user, login_user,get_user_balance};
     use actix_web::{App, HttpServer, web};
-    use bets::handler::place_bet;
+    use bets::handler::{place_bet , get_user_bets , submit_event_result };
+    use utoipa::OpenApi;
+    use utoipa_swagger_ui::SwaggerUi;
+    #[derive(OpenApi)]
+    #[openapi(
+        paths(
+            crate::users::handler::register_user,
+            crate::users::handler::login_user,
+            crate::users::handler::get_user_balance,
+            crate::bets::handler::place_bet,
+            crate::bets::handler::get_user_bets,
+            crate::bets::handler::submit_event_result
+        ),
+        components(
+            schemas = [User, RegisterInput, LoginInput, PlaceBetInput, EventResultInput]
+        ),
+        tags(
+            (name = "Betting API", description = "Endpoints for sports betting API")
+        )
+    )]
+    pub struct ApiDoc;
     #[actix_web::main]
     async fn main() -> std::io::Result<()> {
         dotenv::dotenv().ok();
@@ -23,6 +43,10 @@
                 .service(register_user)
                 .service(login_user)
                 .service(get_user_balance)
+                .service(place_bet)
+                .service(get_user_bets)
+                .service(submit_event_result)
+                .service(SwaggerUi::new("/docs").url("/api-doc/openapi.json", ApiDoc::openapi()))
         })
         .bind("127.0.0.1:8080")?
         .run()
