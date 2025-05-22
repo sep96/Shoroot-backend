@@ -22,3 +22,20 @@ pub struct LoginInput {
     pub username: String,
     pub password: String,
 }
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+pub struct Bet {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub event_id: Uuid,
+    pub predicted_winner: String,
+    pub amount: i64,
+    pub status: String, // "pending", "won", "lost"
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PlaceBetInput {
+    pub event_id: Uuid,
+    pub predicted_winner: String,
+    pub amount: i64,
+}
+
