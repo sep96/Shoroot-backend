@@ -9,26 +9,29 @@
     use users::handler::{register_user, login_user,get_user_balance};
     use actix_web::{App, HttpServer, web};
     use bets::handler::{place_bet , get_user_bets , submit_event_result };
-    use utoipa::OpenApi;
-    use utoipa_swagger_ui::SwaggerUi;
-    #[derive(OpenApi)]
-    #[openapi(
+    use utoipa::OpenApi;  
+    use utoipa_swagger_ui::SwaggerUi; 
+
+   #[derive(OpenApi)]
+   #[openapi(
         paths(
-            crate::users::handler::register_user,
-            crate::users::handler::login_user,
-            crate::users::handler::get_user_balance,
-            crate::bets::handler::place_bet,
-            crate::bets::handler::get_user_bets,
-            crate::bets::handler::submit_event_result
+            register_user,
+            login_user,
+            get_user_balance,
+            place_bet,
+            get_user_bets,
+            submit_event_result
         ),
         components(
-            schemas = [User, RegisterInput, LoginInput, PlaceBetInput, EventResultInput]
+            schemas(User, RegisterInput, LoginInput, PlaceBetInput, EventResultInput)
         ),
         tags(
-            (name = "Betting API", description = "Endpoints for sports betting API")
+            (name = "Betting API", description = "Endpoints for sports betting")
         )
     )]
     pub struct ApiDoc;
+
+
     #[actix_web::main]
     async fn main() -> std::io::Result<()> {
         dotenv::dotenv().ok();
