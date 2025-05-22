@@ -39,3 +39,10 @@ pub struct PlaceBetInput {
     pub amount: i64,
 }
 
+#[derive(Debug, sqlx::FromRow)]
+pub struct BetForSettlement {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub predicted_winner: String,
+    pub amount: i64,
+}
