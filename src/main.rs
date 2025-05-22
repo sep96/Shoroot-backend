@@ -6,7 +6,7 @@
     mod models;
     use config::Config;
     use db::connect;
-    use users::handler::{register_user, login_user};
+    use users::handler::{register_user, login_user,get_user_balance};
     use actix_web::{App, HttpServer, web};
     use bets::handler::place_bet;
     #[actix_web::main]
@@ -22,6 +22,7 @@
                 .app_data(web::Data::new(pool.clone()))
                 .service(register_user)
                 .service(login_user)
+                .service(get_user_balance)
         })
         .bind("127.0.0.1:8080")?
         .run()
