@@ -4,6 +4,7 @@ use sqlx::PgPool;
 use crate::models::user::{PlaceBetInput, Bet};
 use crate::auth::jwt::Claims;
 use actix_web::HttpRequest;
+use actix_web::get;
 use serde_json::json;
 
 fn extract_user_id_from_request(req: &HttpRequest) -> Option<Uuid> {
@@ -41,5 +42,27 @@ pub async fn place_bet(
     match result {
         Ok(_) => HttpResponse::Ok().json(json!({"message": "Bet placed successfully"})),
         Err(_) => HttpResponse::InternalServerError().json(json!({"error": "Failed to place bet"})),
+    }
+}
+#[get("/api/bets")]
+pub async fn get_user_bets(
+    req: HttpRequest,
+    db: web::Data<sqlx::PgPool>,
+) -> impl Responder {
+    let user_id = match extract_user_id_from_request(&req) {
+        Some(uid) => uid,
+        None => return HttpResponse::Unauthorized().json(serde_json::json!({"error": "Invalid token"})),
+    };
+
+    let bets = sqlx::query_as::<_, Bet>(
+        "SELECT id, user_id, event_id, predicted_winner, amount, status FROM bets WHERE user_id = $1"
+    )
+    .bind(user_id)
+    .fetch_all(db.get_ref())
+    .await;
+
+    match bets {
+        Ok(bets) => HttpResponse::Ok().json(bets),
+        Err(_) => HttpResponse::InternalServerError().json(serde_json::json!({"error": "Failed to fetch bets"})),
     }
 }
